@@ -1,0 +1,53 @@
+FROM python:3-alpine3.9
+LABEL author="https://github.com/larssb"
+
+#
+# CONFIG 1
+#
+ENTRYPOINT [ "certbot" ]
+EXPOSE 80 443
+VOLUME /etc/letsencrypt /var/lib/letsencrypt
+WORKDIR /opt/certbot
+
+#
+# RUN 1 - Git
+# 
+RUN apk add --no-cache --virtual .git \
+    bash \
+    git \
+    openssh \
+    && git clone https://github.com/certbot/certbot.git . \
+    && mkdir src && cp CHANGELOG.md README.rst setup.py src/ \
+    && cp letsencrypt-auto-source/pieces/dependency-requirements.txt . \
+    && cp -R acme src/ \
+    && cp -R certbot src/ \
+    && cp -R certbot-dns-cloudflare src/ \
+    && apk del .git
+
+#
+# RUN 2 - pip install files
+#
+RUN sh -c 'cat dependency-requirements.txt | /opt/certbot/tools/strip_hashes.py > unhashed_requirements.txt'
+RUN sh -c 'cat tools/dev_constraints.txt unhashed_requirements.txt | /opt/certbot/tools/merge_requirements.py > docker_constraints.txt'
+
+#
+# RUN 3 - prep. certbot
+#
+RUN apk add --no-cache --virtual .certbot-deps \
+        libffi \
+        libssl1.1 \
+        openssl \
+        ca-certificates \
+        binutils
+RUN apk add --no-cache --virtual .build-deps \
+        gcc \
+        linux-headers \
+        openssl-dev \
+        musl-dev \
+        libffi-dev \
+    && pip install -r /opt/certbot/dependency-requirements.txt \
+    && pip install --no-cache-dir --no-deps \
+        --editable /opt/certbot/src/acme \
+        --editable /opt/certbot/src \
+    && pip install --constraint docker_constraints.txt --no-cache-dir --editable src/certbot-dns-cloudflare \
+    && apk del .build-deps

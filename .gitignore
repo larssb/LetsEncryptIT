@@ -1,0 +1,11 @@
+#
+# FILES TO IGNORE
+#
+*.log
+
+# MacOS specific files
+*.DS_Store
+
+#
+# FOLDER TO IGNORE
+#

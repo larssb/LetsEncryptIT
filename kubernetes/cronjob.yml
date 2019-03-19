@@ -1,0 +1,35 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: NAME_OF_THE_JOB
+spec:
+  schedule: "30 9,21 * * *"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: NAME_OF_THE_CONTAINER
+            image: eu.gcr.io/PROJECT_NAME/IMAGE_NAME:TAG_VERSION
+            env:
+            - name: CERT_NAME
+              value: /etc/secret/CERT_NAME
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /etc/secret/credentials.json
+            volumeMounts:
+            - name: secret
+              mountPath: "/etc/secret"
+              readOnly: true
+            - name: letsencryptdata
+              mountPath: "/etc/letsencrypt"
+            - name: letsencryptdata
+              mountPath: "/var/lib/letsencrypt"
+          volumes:
+          - name: secret
+            secret:
+              secretName: NAME_OF_THE_SECRET
+          - name: letsencryptdata
+            persistentVolumeClaim:
+              claimName: NAME_OF_THE_CLAIM
+          restartPolicy: OnFailure

@@ -1,0 +1,19 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: bs-letsencrypt-upload-data-middleman
+  labels:
+    app: bs-letsencrypt-upload-data-middleman
+
+spec:
+  containers:
+    - name: bs-letsencrypt-upload-data-middleman-container
+      image: 
+      volumeMounts:
+      - name: letsencryptdata
+        mountPath: "/uploadedData"
+      command: ["/bin/bash", "-ecx", "while :; do printf '.'; sleep 5 ; done"]
+  volumes:
+    - name: letsencryptdata
+      persistentVolumeClaim:
+        claimName: bs-letsencrypt-disk

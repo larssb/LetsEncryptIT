@@ -39,3 +39,7 @@ Basically only the top-level line of. From `FROM python:2-alpine3.9` to `FROM py
 #### cronjob.yml
 
 Consider this file a template which can be used for setting up a Kubernetes cronjob.
+
+#### letsencryptit-pod.yml
+
+A pod for working with

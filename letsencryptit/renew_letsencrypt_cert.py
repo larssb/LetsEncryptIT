@@ -62,13 +62,13 @@ dns_cloudflare_api_key = {1}".format(dns_cloudflare_email, dns_cloudflare_api_ke
         --> Go! <--
     """
     # Get the domains on the specified certificate
-    certbotCertificatesExecutionStr = 'certbot certificates --cert-name {0} --work-dir {1} --logs-dir {1} --config-dir {1} \
+    certbotCertificatesExecutionStr = 'certbot certificates --cert-name {0} --work-dir {1} --logs-dir {1}/logs --config-dir {1} \
                                       | grep "Domains"'.format(cert_name, letsencrypt_data_dir)
     certificateDomains = subprocess.run(certbotCertificatesExecutionStr, shell=True, text=True, capture_output=True)
     certificateDomainsParsed = certificateDomains.stdout.replace("Domains:","").strip().replace(" ",",")
 
     # Renew the certificate
-    certbotCertonlyExecutionStr = 'certbot certonly --cert-name {0} --work-dir {1} --logs-dir {1} --config-dir {1} \
+    certbotCertonlyExecutionStr = 'certbot certonly --cert-name {0} --work-dir {1} --logs-dir {1}/logs --config-dir {1} \
                                   --dns-cloudflare --dns-cloudflare-credentials {2} --dns-cloudflare-propagation-seconds 60 \
                                   --keep-until-expiring --deploy-hook {3}/../scripts/deploy-hook-runner.sh --non-interactive \
                                   --domains {4}'.format(cert_name, letsencrypt_data_dir, cloudflare_ini_path, pathToSelf, certificateDomainsParsed)

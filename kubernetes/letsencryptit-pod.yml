@@ -1,18 +1,17 @@
 kind: Pod
 apiVersion: v1
 metadata:
-  name: bs-letsencrypt-upload-data-middleman
+  name: letsencryptit-cli
   labels:
-    app: bs-letsencrypt-upload-data-middleman
-
+    app: letsencryptit-cli 
 spec:
   containers:
-    - name: bs-letsencrypt-upload-data-middleman-container
-      image: 
+    - name: letsencryptit-cli-container
+      image: index.docker.io/larssb/letsencryptit
       volumeMounts:
       - name: letsencryptdata
-        mountPath: "/uploadedData"
-      command: ["/bin/bash", "-ecx", "while :; do printf '.'; sleep 5 ; done"]
+        mountPath: "/data"
+      command: ["python3", "-c $'import time\\nwhile (True):\\n    print(\".\");time.sleep(5);'"]
   volumes:
     - name: letsencryptdata
       persistentVolumeClaim:

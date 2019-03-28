@@ -18,7 +18,8 @@ COPY ./letsencryptit /letsencryptit/
 RUN pip install --upgrade google-api-python-client --disable-pip-version-check --no-cache-dir \
     && pip install --upgrade oauth2client --disable-pip-version-check --no-cache-dir \
     && pip install --upgrade sty --disable-pip-version-check --no-cache-dir \
-    && chmod +x /letsencryptit/scripts/deploy-hook-runner.sh
+    && chmod +x /scripts/deploy-hook-runner.sh
 
 # Set an ENTRYPOINT to override the entrypoint specified in certbot/certbot
-ENTRYPOINT "/usr/local/bin/python3" "-c" 'from renew_letsencrypt_cert import renew_letsencrypt_cert; renew_letsencrypt_cert("$CERT_NAME", "$LETSENCRYPT_DATA_DIR")'
+ENTRYPOINT ["/usr/local/bin/python3"]
+CMD ["-c"]

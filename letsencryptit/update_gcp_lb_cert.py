@@ -73,17 +73,17 @@ if private_key_data and certificate_data:
         Update the active certificate/s on the load-balancer
         """
         # First, get the current load-balancer state 
-        brickshareProxyReq = service.targetHttpsProxies().get(project=PROJECT_NAME,targetHttpsProxy=TARGET_HTTPS_PROXY)
+        GCPProxyReq = service.targetHttpsProxies().get(project=PROJECT_NAME,targetHttpsProxy=TARGET_HTTPS_PROXY)
 
-        if brickshareProxyReq is not None:
-            brickshareProxyRes = brickshareProxyReq.execute()
+        if GCPProxyReq is not None:
+            GCPProxyRes = GCPProxyReq.execute()
 
-            if not (hasattr(brickshareProxyRes, 'error')):
+            if not (hasattr(GCPProxyRes, 'error')):
                 # Filter operation to end up with all current active certs minus the old LetsEncrypt cert....
                 # ...and the newly generated and inserted LetsEncrypt cert
                 loadBalancerCertsBody = []
                 oldCerts = []
-                for ssl_certificate in brickshareProxyRes['sslCertificates']:
+                for ssl_certificate in GCPProxyRes['sslCertificates']:
                     if not re.search("letsencrypt", ssl_certificate):
                         # Add the non-letsencrypt active cert.
                         loadBalancerCertsBody.append(ssl_certificate)
@@ -103,12 +103,12 @@ if private_key_data and certificate_data:
                 }
 
                 # Update the set of active certificates on the load-balancer
-                brickshareProxySetSslCertificatesReq = service.targetHttpsProxies().setSslCertificates(project=PROJECT_NAME, targetHttpsProxy=TARGET_HTTPS_PROXY, body=loadBalancer_ssl_certificates_body)
+                GCPProxySetSslCertificatesReq = service.targetHttpsProxies().setSslCertificates(project=PROJECT_NAME, targetHttpsProxy=TARGET_HTTPS_PROXY, body=loadBalancer_ssl_certificates_body)
 
-                if brickshareProxySetSslCertificatesReq is not None:
-                    brickshareProxySetSslCertificatesRes = brickshareProxySetSslCertificatesReq.execute()
+                if GCPProxySetSslCertificatesReq is not None:
+                    GCPProxySetSslCertificatesRes = GCPProxySetSslCertificatesReq.execute()
 
-                    if not (hasattr(brickshareProxySetSslCertificatesRes, 'error')):
+                    if not (hasattr(GCPProxySetSslCertificatesRes, 'error')):
                         """
                         Remove the old LetsEncrypt certificates dangling on the load-balancer
                         """
@@ -121,17 +121,17 @@ if private_key_data and certificate_data:
                                 print(fg(255, 10, 10) + removeCertResponseFail + ' you will have to manually remove the certificate. You really should!')
                                 logging.error(removeCertResponseFail)
                     else:
-                        brickshareProxySetSslCertificatesResFail = 'Err in the response to update certs on the load-balancer. The error is: %s' % brickshareProxySetSslCertificatesRes.error.errors
-                        print(fg(255, 10, 10) + brickshareProxySetSslCertificatesResFail + ' the load-balancer was not updated, you will have to manually do something. ' + EXIT_MSG)
-                        logging.error(brickshareProxySetSslCertificatesResFail)
+                        GCPProxySetSslCertificatesResFail = 'Err in the response to update certs on the load-balancer. The error is: %s' % GCPProxySetSslCertificatesRes.error.errors
+                        print(fg(255, 10, 10) + GCPProxySetSslCertificatesResFail + ' the load-balancer was not updated, you will have to manually do something. ' + EXIT_MSG)
+                        logging.error(GCPProxySetSslCertificatesResFail)
                         sys.exit()
                 else:
-                    brickshareProxySetSslCertificatesReqFail = 'The request to update certs on the load-balancer failed with: %s' % brickshareProxySetSslCertificatesReq.error.errors
-                    pp.pprint(brickshareProxySetSslCertificatesReqFail + EXIT_MSG)
-                    logging.error(brickshareProxySetSslCertificatesReqFail)
+                    GCPProxySetSslCertificatesReqFail = 'The request to update certs on the load-balancer failed with: %s' % GCPProxySetSslCertificatesReq.error.errors
+                    pp.pprint(GCPProxySetSslCertificatesReqFail + EXIT_MSG)
+                    logging.error(GCPProxySetSslCertificatesReqFail)
                     sys.exit()
             else:
-                loadBalancerResFail = 'Err in the response to get the load-balancer. The error is: %s' % brickshareProxyRes.error.errors
+                loadBalancerResFail = 'Err in the response to get the load-balancer. The error is: %s' % GCPProxyRes.error.errors
                 pp.pprint(loadBalancerResFail + EXIT_MSG)
                 logging.error(loadBalancerResFail)
                 sys.exit()

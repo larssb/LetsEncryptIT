@@ -1,0 +1,48 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: letsencryptit-renew
+spec:
+  schedule: "30 9,21 * * *"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: letsencryptit
+            image: index.docker.io/larssb/letsencryptit
+            env:
+            - name: CERT_NAME
+              valueFrom:
+                secretKeyRef: 
+                  key: CERT_NAME
+                  name: letsencryptit
+            - name: dns_cloudflare_api_key
+              valueFrom:
+                secretKeyRef:
+                  key: dns_cloudflare_api_key
+                  name: letsencryptit
+            - name: dns_cloudflare_email
+              valueFrom:
+                secretKeyRef:
+                  key: dns_cloudflare_email
+                  name: letsencryptit
+            - name: LETSENCRYPT_DATA_DIR
+              valueFrom:
+                secretKeyRef:
+                  key: LETSENCRYPT_DATA_DIR
+                  name: letsencryptit
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              valueFrom:
+                secretKeyRef:
+                  key: GOOGLE_APPLICATION_CREDENTIALS
+                  name: letsencryptit
+            volumeMounts:
+            - name: letsencryptdata
+              mountPath: "/data"
+          volumes:
+            - name: letsencryptdata
+              persistentVolumeClaim:
+                claimName: bs-letsencrypt-disk
+          restartPolicy: OnFailure

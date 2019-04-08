@@ -1,6 +1,6 @@
 """
 What it does:
-    Handles the renewal of a LetsEncrypt certificate
+    Handles the expansion of a LetsEncrypt certificate. In practice this means to add one or more domains to an existing certificate
 
 Pre-requisites:
     - In order to use this an environment variable named GOOGLE_APPLICATION_CREDENTIALS needs to be set in the environment.
@@ -8,14 +8,11 @@ Pre-requisites:
     More here > https://cloud.google.com/docs/authentication/getting-started#verifying_authentication
         -- The GOOGLE_APPLICATION_CREDENTIALS env. var. is used by the 'update_gcp_lb_cert.py' script. Which is called
         by the --deploy-hook, which in turn is called by the 'certbot certonly...' command.
-    - Environment variables for:
-        -- dns_cloudflare_email &
-        -- dns_cloudflare_api_key
-    ...needs to be set as well.
+    - Environment variables needs to be set. See the ReadMe file for the project for more info
 
 Various notes:
     - The script assumes that you use CloudFlare as your DNS provider and will use that as the authentication mechanism when
-    renewing the certificate
+    expanding the certificate
 """
 # Imports
 from constants import DATE_TIME
@@ -29,7 +26,7 @@ import tempfile
 Preparation
 """
 # Configure logging
-logging.basicConfig(filename='renew_letsencrypt_cert.log', filemode='w', level=logging.DEBUG)
+logging.basicConfig(filename='expand_letsencrypt_cert.log', filemode='w', level=logging.DEBUG)
 logging.info("--- LOG START ---")
 logging.info("--- %s ---" % DATE_TIME)
 
@@ -46,8 +43,14 @@ pathToSelf = os.path.dirname(os.path.realpath(__file__))
 """
     --> Go! <--
 """
-def renew_letsencrypt_cert(cert_name, letsencrypt_data_dir):
-    # A string literal for the data to write to the cloudflare.ini file
+def expand_letsencrypt_cert(cert_name, letsencrypt_data_dir, domains):
+    # Get the domains on the specified certificate. We add domains in the `domains` parameter to the domains currently on the certificate
+    certbotCertificatesExecutionStr = 'certbot certificates --cert-name {0} --work-dir {1} --logs-dir {1}/logs --config-dir {1} \
+                                      | grep "Domains"'.format(cert_name, letsencrypt_data_dir)
+    certificateDomains = subprocess.run(certbotCertificatesExecutionStr, shell=True, text=True, capture_output=True)
+    certificateDomainsParsed = certificateDomains.stdout.replace("Domains:","").strip().replace(" ",",")
+
+    # Prepare the cloudflare.ini file
     cloudflare_ini_data = "# Cloudflare API credentials used by Certbot\n\
 dns_cloudflare_email = {0}\n\
 dns_cloudflare_api_key = {1}".format(dns_cloudflare_email, dns_cloudflare_api_key)
@@ -55,17 +58,12 @@ dns_cloudflare_api_key = {1}".format(dns_cloudflare_email, dns_cloudflare_api_ke
     # Write the cloudflare.ini file to disk, a requirement of the CloudFlare auth. mechanism
     write_cloudflare_ini(cloudflare_ini_path, cloudflare_ini_data)
 
-    # Get the domains on the specified certificate
-    certbotCertificatesExecutionStr = 'certbot certificates --cert-name {0} --work-dir {1} --logs-dir {1}/logs --config-dir {1} \
-                                      | grep "Domains"'.format(cert_name, letsencrypt_data_dir)
-    certificateDomains = subprocess.run(certbotCertificatesExecutionStr, shell=True, text=True, capture_output=True)
-    certificateDomainsParsed = certificateDomains.stdout.replace("Domains:","").strip().replace(" ",",")
-
-    # Renew the certificate
+    # Expand the certificate
+    newDomains = certificateDomainsParsed + "," + domains
     certbotCertonlyExecutionStr = 'certbot certonly --cert-name {0} --work-dir {1} --logs-dir {1}/logs --config-dir {1} \
                                   --dns-cloudflare --dns-cloudflare-credentials {2} --dns-cloudflare-propagation-seconds 60 \
-                                  --keep-until-expiring --deploy-hook {3}/../scripts/deploy-hook-runner.sh --non-interactive \
-                                  --domains {4}'.format(cert_name, letsencrypt_data_dir, cloudflare_ini_path, pathToSelf, certificateDomainsParsed)
+                                  --domains {3} --deploy-hook {4}/../scripts/deploy-hook-runner.sh --non-interactive \
+                                  '.format(cert_name, letsencrypt_data_dir, cloudflare_ini_path, newDomains, pathToSelf)
     subprocess.run(certbotCertonlyExecutionStr, shell=True, text=True, capture_output=True)
 
     """

@@ -69,21 +69,30 @@ def shrink_letsencrypt_cert(cert_name, letsencrypt_data_dir, domains:list, debug
     if debugMode is True:
         print("_Cert domains BEFORE removing_")
         pp.pprint(certificateDomainsSplitted)
+        print("Domains count before: %s" % domainsCountBefore)
     
     for domain in domains:
         if debugMode is True:
             print("Removing this domain > %s" % domain)
-        certificateDomainsSplitted.remove('%s' % domain)
+        
+        try:
+            certificateDomainsSplitted.remove('%s' % domain)
+        except ValueError:
+            pass # we are okay with a domain not being in the list. User might have done a typo
+        
         logging.info("%s will be removed from the cert" % domain)
 
     if debugMode is True:
         print("_Cert domains AFTER removing_")
         pp.pprint(certificateDomainsSplitted)
+        print("Number of domains in the domains list: %s" % len(certificateDomainsSplitted))
 
-    # Semaphore
-    generateNewCert = domainsCountBefore == len(certificateDomainsSplitted)
-    if generateNewCert:
-        logging.info("Domains was removed from the certificate. A new cert. will be generated")
+    if (domainsCountBefore == len(certificateDomainsSplitted)) is False:
+        domainsRemovedMsg = "Domains was removed from the certificate. A new cert. will be generated"
+        logging.info(domainsRemovedMsg)
+        
+        if debugMode is True:
+            print(domainsRemovedMsg)
 
         # Convert the certificateDomainsSplitted back into a string that certbot can "chew"
         newDomains = ','.join(certificateDomainsSplitted) # The separator between elements is the string providing this method
@@ -96,8 +105,14 @@ def shrink_letsencrypt_cert(cert_name, letsencrypt_data_dir, domains:list, debug
         subprocess.run(certbotCertonlyExecutionStr, shell=True, text=True, capture_output=True)
 
         # Info the end-user
-        print("A new version of the %s certificate was generated and the GCP load-balancer was updated with it" % cert_name)
+        newCertGeneratedMsg = "A new version of the %s certificate was generated and the GCP load-balancer was updated with it" % cert_name
+        print(newCertGeneratedMsg)
+        logging.info(newCertGeneratedMsg)
     else:
-        logging.info("No domains was removed from the certificate. A new cert. will not be generated")
+        domainsNotRemovedMsg = "No domains was removed from the certificate. A new cert. will not be generated"
+        logging.info(domainsNotRemovedMsg)
+        
+        if debugMode is True:
+            print(domainsNotRemovedMsg)
     
     logging.info("--- LOG END ---")

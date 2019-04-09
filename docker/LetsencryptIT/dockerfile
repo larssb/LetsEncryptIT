@@ -7,18 +7,22 @@ LABEL author="https://github.com/larssb"
 WORKDIR /letsencryptit
 
 #
+# INSTALL 1
+#
+RUN pip install --upgrade google-api-python-client --disable-pip-version-check --no-cache-dir \
+    && pip install --upgrade oauth2client --disable-pip-version-check --no-cache-dir \
+    && pip install --upgrade sty --disable-pip-version-check --no-cache-dir
+
+#
 # COPY IN DATA
 #
 COPY ./scripts /scripts/
 COPY ./letsencryptit /letsencryptit/
 
 #
-# INSTALL
+# INSTALL 2
 #
-RUN pip install --upgrade google-api-python-client --disable-pip-version-check --no-cache-dir \
-    && pip install --upgrade oauth2client --disable-pip-version-check --no-cache-dir \
-    && pip install --upgrade sty --disable-pip-version-check --no-cache-dir \
-    && chmod +x /scripts/deploy-hook-runner.sh
+RUN chmod +x /scripts/deploy-hook-runner.sh
 
 # Set an ENTRYPOINT to override the entrypoint specified in certbot/certbot
 ENTRYPOINT ["/usr/local/bin/python3"]

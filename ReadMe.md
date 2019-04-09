@@ -92,7 +92,7 @@ A Pod deployment to act as a cli for interacting with the LetsEncryptIT tool. E.
 
 ### On LetsEncryptIT
 
-- See [debug_info](./docs/debug_info.md)
+- See [Get info and debug LetsEncryptIT](./docs/debug_info.md)
 - [a look behind the scenes](.docs/behind_scene_technical_details.md). On the inner workings of the LetsEncryptIT tool
 
 ### On the components that LetsEncryptIT uses

@@ -36,6 +36,7 @@ A tool for managing LetsEncrypt certificates. Focusing on Kubernetes and the Goo
 > As of 20190408
 
 - Expand a LetsEncrypt certificate. With one or more domains
+  - See ![this wiki](./docs/expanding_letsencrypt_cert.md) for more
 - Remove one or more domains from a LetsEncrypt certificate. Shrinking it (_shrinking_ is not verified LetsEncrypt terminology)
 - Renewing a LetsEncrypt certificate
 

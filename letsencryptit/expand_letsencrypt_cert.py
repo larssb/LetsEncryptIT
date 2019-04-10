@@ -27,15 +27,9 @@ Preparation
 """
 # Configure logging
 logging.basicConfig(filename='expand_letsencrypt_cert.log', filemode='w', level=logging.DEBUG)
-logging.info("--- LOG START ---")
-logging.info("--- %s ---" % DATE_TIME)
 
 # Define the path to cloudflare.ini
 cloudflare_ini_path = tempfile.gettempdir() + "/cloudflare.ini"
-
-# Get the values of the dns_cloudflare_email & dns_cloudflare_api_key env. vars.
-dns_cloudflare_email = os.environ['dns_cloudflare_email']
-dns_cloudflare_api_key = os.environ['dns_cloudflare_api_key']
 
 # Get the path of the script. To use that when executing certbot cmds
 pathToSelf = os.path.dirname(os.path.realpath(__file__))
@@ -44,19 +38,17 @@ pathToSelf = os.path.dirname(os.path.realpath(__file__))
     --> Go! <--
 """
 def expand_letsencrypt_cert(cert_name, letsencrypt_data_dir, domains):
+    logging.info("--- LOG START ---")
+    logging.info("--- %s ---" % DATE_TIME)
+    
     # Get the domains on the specified certificate. We add domains in the `domains` parameter to the domains currently on the certificate
     certbotCertificatesExecutionStr = 'certbot certificates --cert-name {0} --work-dir {1} --logs-dir {1}/logs --config-dir {1} \
                                       | grep "Domains"'.format(cert_name, letsencrypt_data_dir)
     certificateDomains = subprocess.run(certbotCertificatesExecutionStr, shell=True, text=True, capture_output=True)
     certificateDomainsParsed = certificateDomains.stdout.replace("Domains:","").strip().replace(" ",",")
 
-    # Prepare the cloudflare.ini file
-    cloudflare_ini_data = "# Cloudflare API credentials used by Certbot\n\
-dns_cloudflare_email = {0}\n\
-dns_cloudflare_api_key = {1}".format(dns_cloudflare_email, dns_cloudflare_api_key)
-
     # Write the cloudflare.ini file to disk, a requirement of the CloudFlare auth. mechanism
-    write_cloudflare_ini(cloudflare_ini_path, cloudflare_ini_data)
+    write_cloudflare_ini(cloudflare_ini_path)
 
     # Expand the certificate
     newDomains = certificateDomainsParsed + "," + domains
@@ -71,3 +63,5 @@ dns_cloudflare_api_key = {1}".format(dns_cloudflare_email, dns_cloudflare_api_ke
     """
     # Remove the cloudflare.ini file used
     delete_cloudflare_ini(cloudflare_ini_path)
+
+    logging.info("--- LOG END ---")

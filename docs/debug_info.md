@@ -16,7 +16,8 @@ Each task has its own log. E.g. the _renew_ task has a log named: `renew_letsenc
 - The expand task: `expand_letsencrypt_cert.log`
 - The shrink task: `shrink_letsencrypt_cert.log`
 - The list task: `list_letsencrypt_cert.log`
+- The GCP Load-balancer task, used by the `--deploy-hook` of the __Certbot__ command: `update_gcp_lb_cert.log`
 
 ### How-to view it
 
-In order to view the log for the _renew_ task, execute: `kubectl exec letsencryptit-cli -c letsencryptit-cli -- cat /letsencryptit/renew_letsencrypt_cert.log`
+In order to view e.g. the _renew_ task log. Execute: `kubectl exec letsencryptit-cli -c letsencryptit-cli -- cat /letsencryptit/renew_letsencrypt_cert.log`

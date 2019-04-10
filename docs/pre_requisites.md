@@ -2,7 +2,7 @@
 
 The things you have to and ensure is in place before you can reap the benefits of using LetsEncyptIT
 
-## Foundational tasks. What needs to be done in order to LetsEncryptIT at all
+## Foundational tasks. What needs to be done in order to use LetsEncryptIT
 
 1. Store your LetsEncrypt data on a persistent disk on the Google Cloud platform (GCP)
     1. See [GCP, persistent volumes](https://cloud.google.com/kubernetes-engine/docs/concepts/persistent-volumes) and [Kubernetes docs, persistent volumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) on how-to create a persistent disk
@@ -13,6 +13,7 @@ The things you have to and ensure is in place before you can reap the benefits o
     3. This configuration is to hold values for the environment variables you want to be able to apply to the cli LetsEncrypt Pod in a secure way. You can for your convenience use the provided `secrets.yml` file as a template.
         3. N.B. do remember to base64 encode the values of the secrets properties in the `data` array property in the YML file
         3. N.B. the value you provide to the _LETSENCRYPT_DATA_DIR_ environment variable, is reflective of the _mountPath_ of the __letsencryptdata__ volume mount in the __letsencryptit-pod.yml__ file
+        3. You might need help on gathering the value for the _gcp_project_proxy_ environment variable. Get that in >> [How-to get the name of the GCP proxy to update with a LetsEncrypt certificate](./gcp_proxy_get_name.md)
 
 ## Deploy tasks. After finishing the foundational tasks
 

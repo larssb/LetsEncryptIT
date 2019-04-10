@@ -21,6 +21,11 @@ spec:
           secretKeyRef: 
             key: CERT_NAME
             name: letsencryptit
+      - name: CERT_DESCRIPTION
+        valueFrom:
+          secretKeyRef:
+            key: CERT_DESCRIPTION
+            name: letsencryptit
       - name: dns_cloudflare_api_key
         valueFrom:
           secretKeyRef:
@@ -36,15 +41,29 @@ spec:
           secretKeyRef:
             key: LETSENCRYPT_DATA_DIR
             name: letsencryptit
-      - name: GOOGLE_APPLICATION_CREDENTIALS
+      - name: gcp_project_name
         valueFrom:
           secretKeyRef:
-            key: GOOGLE_APPLICATION_CREDENTIALS
+            key: gcp_project_name
             name: letsencryptit
+      - name: gcp_project_proxy
+        valueFrom:
+          secretKeyRef:
+            key: gcp_project_proxy
+            name: letsencryptit
+      - name: GOOGLE_APPLICATION_CREDENTIALS
+        value: /secret/GOOGLE_APPLICATION_CREDENTIALS.json
       volumeMounts:
       - name: letsencryptdata
         mountPath: "/data"
+      - name: secret
+        mountPath: "/secret"
+        readOnly: true
   volumes:
     - name: letsencryptdata
       persistentVolumeClaim:
         claimName: bs-letsencrypt-disk
+    - name: secret
+      secret:
+        defaultMode: 0400
+        secretName: letsencryptit

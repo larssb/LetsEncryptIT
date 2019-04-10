@@ -18,6 +18,11 @@ spec:
                 secretKeyRef: 
                   key: CERT_NAME
                   name: letsencryptit
+            - name: CERT_DESCRIPTION
+              valueFrom:
+                secretKeyRef:
+                  key: CERT_DESCRIPTION
+                  name: letsencryptit
             - name: dns_cloudflare_api_key
               valueFrom:
                 secretKeyRef:
@@ -32,6 +37,16 @@ spec:
               valueFrom:
                 secretKeyRef:
                   key: LETSENCRYPT_DATA_DIR
+                  name: letsencryptit
+            - name: gcp_project_name
+              valueFrom:
+                secretKeyRef:
+                  key: gcp_project_name
+                  name: letsencryptit
+            - name: gcp_project_proxy
+              valueFrom:
+                secretKeyRef:
+                  key: gcp_project_proxy
                   name: letsencryptit
             - name: GOOGLE_APPLICATION_CREDENTIALS
               valueFrom:

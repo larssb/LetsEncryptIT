@@ -8,7 +8,7 @@ A tool for managing LetsEncrypt certificates. Focusing on Kubernetes and the Goo
   - [Axioms - Assumptions](#axioms---assumptions)
   - [What you can do with LetsEncryptIT](#what-you-can-do-with-letsencryptit)
   - [Using it](#using-it)
-    - [On the cmdline](#on-the-cmdline)
+    - [On the command-line](#on-the-command-line)
     - [In a Kubernetes cron job](#in-a-kubernetes-cron-job)
       - [Pre-requisites](#pre-requisites)
     - [Setting up the cron job](#setting-up-the-cron-job)
@@ -42,7 +42,7 @@ A tool for managing LetsEncrypt certificates. Focusing on Kubernetes and the Goo
 
 ## Using it
 
-### On the cmdline
+### On the command-line
 
 1. Read the [pre-requisites](./docs/pre_requisites.md) document
 2. Refer yourself to the links to documentation on this, in the [section above](#What-you-can–do-with-LetsEncryptIT)
@@ -51,12 +51,13 @@ A tool for managing LetsEncrypt certificates. Focusing on Kubernetes and the Goo
 
 #### Pre-requisites
 
-1. Update the placeholders to contain real values in the `cronjob.yml` file
-    1. The `claimName` property needs to be updated with the name of the persistent disk claim you made on GCP
+1. Ensure that you have followed the [pre-requisites](./docs/pre_requisites.md) document
+2. Update the placeholders to contain real values in the `cronjob.yml` file
+    2. The `claimName` property needs to be updated with the name of the persistent disk claim you made on GCP
 
 ### Setting up the cron job
 
-Execute: ``
+Execute: `kubectl apply -f ./kubernetes/deploys/cronjob.yml`
 
 ## Specific files and structure explained
 
@@ -99,3 +100,5 @@ A Pod deployment to act as a cli for interacting with the LetsEncryptIT tool. E.
 
 - On [LetsEncrypt](.docs/help_on_letsencrypt.md)
 - On the [Google Cloud load-balancer API](.docs/gcp_lb_api.md)
+- Gathering the name of your GCP proxy. This can be a bit confusing, so I created a [small how-to](./docs/gcp_proxy_get_name.md) on this.
+  - The name is used for the _TARGET_HTTPS_PROXY_ constant variable in the _constants.py_ file. Which gets its value from the _gcp_project_proxy_ environment variable.

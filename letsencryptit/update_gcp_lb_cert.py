@@ -16,8 +16,9 @@ Documentation and info used:
     * https://github.com/cloudify-cosmo/cloudify-gcp-plugin/blob/master/cloudify_gcp/compute/ssl_certificate.py <-- inspiration on how they handled integration to the GC load-balancer API.
 """
 from constants import DATE_TIME, EXIT_MSG, PROJECT_NAME, TARGET_HTTPS_PROXY, CERT_DESCRIPTION
-from helpers import get_pem_data
+from helpers import get_pem_data, wait_for_gcp_global_op
 from googleapiclient import discovery
+from googleapiclient.errors import HttpError
 import logging
 from oauth2client.client import GoogleCredentials
 import os
@@ -38,8 +39,8 @@ logging.info("--- %s ---" % DATE_TIME)
 pp = pprint.PrettyPrinter(indent=4)
 
 # Cert paths - relative to the letsencrypt folder 
-priv_key_path = os.environ['letsencrypt-data-dir'] + "/live/" + os.environ['Certname'] + "/privkey.pem"
-full_cert_path = os.environ['letsencrypt-data-dir'] + "/live/" + os.environ['Certname'] + "/fullchain.pem"     
+priv_key_path = os.environ['LETSENCRYPT_DATA_DIR'] + "/live/" + os.environ['CERT_NAME'] + "/privkey.pem"
+full_cert_path = os.environ['LETSENCRYPT_DATA_DIR'] + "/live/" + os.environ['CERT_NAME'] + "/fullchain.pem"     
 
 """
 Execute
@@ -64,8 +65,23 @@ if private_key_data and certificate_data:
     }
 
     # Make the request to update the certificate on the GC load-balancer
-    insert_cert_request = service.sslCertificates().insert(project=PROJECT_NAME, body=ssl_certificate_body)
-    insert_cert_response = insert_cert_request.execute()
+    try:
+        insert_cert_request = service.sslCertificates().insert(project=PROJECT_NAME, body=ssl_certificate_body)
+        insert_cert_response = insert_cert_request.execute()
+    except HttpError as error:
+        insert_cert_requestHttpErr = "sslCertificates.insert threw an error: %s" % error
+        logging.error(insert_cert_requestHttpErr)
+        print(insert_cert_requestHttpErr + EXIT_MSG)
+        sys.exit()
+
+    # Wait for the sslCertificates insert request to finish
+    try:
+        wait_for_gcp_global_op(service, PROJECT_NAME, insert_cert_response['name'])
+    except Exception as error:
+        wait_for_gcp_global_opErr = "Waiting on the sslCertificates().insert operation to complete failed with: %s" % error
+        logging.error(wait_for_gcp_global_opErr)
+        print(wait_for_gcp_global_opErr + EXIT_MSG)
+        sys.exit()
 
     # Control on the response to see if everything went as intended
     if not (hasattr(insert_cert_response, 'error')):
@@ -91,6 +107,10 @@ if private_key_data and certificate_data:
                         # Add the inserted cert to the array. The targetLink property contains the needed info for the
                         # sslCertificates[] body to the https://cloud.google.com/compute/docs/reference/rest/v1/targetHttpsProxies/setSslCertificates
                         # API endpoint
+                        
+                        # DEBUG
+                        #pp.pprint(insert_cert_response)
+
                         loadBalancerCertsBody.append(insert_cert_response['targetLink'])
 
                         # Note the name of the now old certificate. To refer to this when removing it
@@ -102,34 +122,27 @@ if private_key_data and certificate_data:
                     "sslCertificates": loadBalancerCertsBody
                 }
 
-                # Update the set of active certificates on the load-balancer
-                GCPProxySetSslCertificatesReq = service.targetHttpsProxies().setSslCertificates(project=PROJECT_NAME, targetHttpsProxy=TARGET_HTTPS_PROXY, body=loadBalancer_ssl_certificates_body)
-
-                if GCPProxySetSslCertificatesReq is not None:
+                try:
+                    # Update the set of active certificates on the load-balancer
+                    GCPProxySetSslCertificatesReq = service.targetHttpsProxies().setSslCertificates(project=PROJECT_NAME, targetHttpsProxy=TARGET_HTTPS_PROXY, body=loadBalancer_ssl_certificates_body)
                     GCPProxySetSslCertificatesRes = GCPProxySetSslCertificatesReq.execute()
-
-                    if not (hasattr(GCPProxySetSslCertificatesRes, 'error')):
-                        """
-                        Remove the old LetsEncrypt certificates dangling on the load-balancer
-                        """
-                        for oldCert in oldCerts:
-                            remove_cert_request = service.sslCertificates().delete(project=PROJECT_NAME, sslCertificate=oldCert)
-                            remove_cert_response = remove_cert_request.execute()
-
-                            if (hasattr(remove_cert_response, 'error')):
-                                removeCertResponseFail = 'Failed to remove the old cert. named %s. The error is: %s' % (oldCert, remove_cert_response.error.errors)
-                                print(fg(255, 10, 10) + removeCertResponseFail + ' you will have to manually remove the certificate. You really should!')
-                                logging.error(removeCertResponseFail)
-                    else:
-                        GCPProxySetSslCertificatesResFail = 'Err in the response to update certs on the load-balancer. The error is: %s' % GCPProxySetSslCertificatesRes.error.errors
-                        print(fg(255, 10, 10) + GCPProxySetSslCertificatesResFail + ' the load-balancer was not updated, you will have to manually do something. ' + EXIT_MSG)
-                        logging.error(GCPProxySetSslCertificatesResFail)
-                        sys.exit()
-                else:
-                    GCPProxySetSslCertificatesReqFail = 'The request to update certs on the load-balancer failed with: %s' % GCPProxySetSslCertificatesReq.error.errors
-                    pp.pprint(GCPProxySetSslCertificatesReqFail + EXIT_MSG)
-                    logging.error(GCPProxySetSslCertificatesReqFail)
+                except HttpError as error:
+                    GCPProxySetSslCertificatesResFail = 'Err in the response to update certs on the load-balancer. The error is: %s' % error
+                    print(fg(255, 10, 10) + GCPProxySetSslCertificatesResFail + ' the load-balancer was not updated, you will have to manually do something. ' + EXIT_MSG)
+                    logging.error(GCPProxySetSslCertificatesResFail)
                     sys.exit()
+
+                """
+                Remove the old LetsEncrypt certificates dangling on the load-balancer
+                """
+                for oldCert in oldCerts:
+                    remove_cert_request = service.sslCertificates().delete(project=PROJECT_NAME, sslCertificate=oldCert)
+                    remove_cert_response = remove_cert_request.execute()
+
+                    if (hasattr(remove_cert_response, 'error')):
+                        removeCertResponseFail = 'Failed to remove the old cert. named %s. The error is: %s' % (oldCert, remove_cert_response.error.errors)
+                        print(fg(255, 10, 10) + removeCertResponseFail + ' you will have to manually remove the certificate. You really should!')
+                        logging.error(removeCertResponseFail)
             else:
                 loadBalancerResFail = 'Err in the response to get the load-balancer. The error is: %s' % GCPProxyRes.error.errors
                 pp.pprint(loadBalancerResFail + EXIT_MSG)
@@ -150,3 +163,5 @@ else:
     pp.pprint(crtDataFail + EXIT_MSG)
     logging.error(crtDataFail)
     sys.exit()
+
+logging.info("--- LOG END ---")

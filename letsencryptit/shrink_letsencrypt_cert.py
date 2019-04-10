@@ -32,10 +32,6 @@ logging.basicConfig(filename='shrink_letsencrypt_cert.log', filemode='w', level=
 # Define the path to cloudflare.ini
 cloudflare_ini_path = tempfile.gettempdir() + "/cloudflare.ini"
 
-# Get the values of the dns_cloudflare_email & dns_cloudflare_api_key env. vars.
-dns_cloudflare_email = os.environ['dns_cloudflare_email']
-dns_cloudflare_api_key = os.environ['dns_cloudflare_api_key']
-
 # Get the path of the script. To use that when executing certbot cmds
 pathToSelf = os.path.dirname(os.path.realpath(__file__))
 
@@ -48,6 +44,9 @@ pp = pprint.PrettyPrinter(indent=4)
 def shrink_letsencrypt_cert(cert_name, letsencrypt_data_dir, domains:list, debugMode:bool=False):
     logging.info("--- LOG START ---")
     logging.info("--- %s ---" % DATE_TIME)
+
+    # Write the cloudflare.ini file to disk, a requirement of the CloudFlare auth. mechanism
+    write_cloudflare_ini(cloudflare_ini_path)
 
     # Get the domains on the specified certificate. We remove the `domains` in the domains parameter, from the domains currently on the cert
     certbotCertificatesExecutionStr = 'certbot certificates --cert-name {0} --work-dir {1} --logs-dir {1}/logs --config-dir {1} \
@@ -114,5 +113,11 @@ def shrink_letsencrypt_cert(cert_name, letsencrypt_data_dir, domains:list, debug
         
         if debugMode is True:
             print(domainsNotRemovedMsg)
+
+    """
+    Clean-up
+    """
+    # Remove the cloudflare.ini file used
+    delete_cloudflare_ini(cloudflare_ini_path)
     
     logging.info("--- LOG END ---")

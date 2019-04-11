@@ -49,15 +49,19 @@ spec:
                   key: gcp_project_proxy
                   name: letsencryptit
             - name: GOOGLE_APPLICATION_CREDENTIALS
-              valueFrom:
-                secretKeyRef:
-                  key: GOOGLE_APPLICATION_CREDENTIALS
-                  name: letsencryptit
+              value: /secret/GOOGLE_APPLICATION_CREDENTIALS.json
             volumeMounts:
             - name: letsencryptdata
               mountPath: "/data"
+            - name: secret
+              mountPath: "/secret"
+              readOnly: true
           volumes:
             - name: letsencryptdata
               persistentVolumeClaim:
                 claimName: bs-letsencrypt-disk
+            - name: secret
+              secret:
+                defaultMode: 0400
+                secretName: letsencryptit                
           restartPolicy: OnFailure

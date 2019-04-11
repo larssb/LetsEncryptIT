@@ -32,19 +32,20 @@ A tool for managing LetsEncrypt certificates. Focusing on Kubernetes and the Goo
 
 ## What you can do with LetsEncryptIT
 
-> As of 20190408
+> As of 20190411
 
 - Expand a LetsEncrypt certificate. With one or more domains. See [expanding a LetsEncrypt certificate](./docs/expanding_letsencrypt_cert.md)
 - Remove one or more domains from a LetsEncrypt certificate. Shrinking it (_shrinking_ is not verified LetsEncrypt terminology)
   - See [shrinking a LetsEncrypt certificate](./docs/shrink_letsencrypt_cert.md)
 - Renewing a LetsEncrypt certificate. See [renewing a LetsEncrypt certificate](./docs/renew_letsencrypt_cert.md)
 - List info on a LetsEncrypt certificate. See [list information on a LetsEncrypt certificate](./docs/list_letsencrypt_cert.md)
+- Update a GCP (Google Cloud Platform) load-balancer with the LetsEncrypt cert stored on a GCP Kubernetes persistent disk. See [this how-to](./docs/update_gcp_lb_cert.md)
 
 ## Using it
 
 ### On the command-line
 
-1. Read the [pre-requisites](./docs/pre_requisites.md) document
+1. Ensure that you have followed the [pre-requisites](./docs/pre_requisites.md) document
 2. Refer yourself to the links to documentation on this, in the [section above](#What-you-can–do-with-LetsEncryptIT)
 
 ### In a Kubernetes cron job

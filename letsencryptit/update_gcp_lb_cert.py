@@ -20,11 +20,10 @@ from helpers import get_pem_data, wait_for_gcp_global_op
 from googleapiclient import discovery
 from googleapiclient.errors import HttpError
 import logging
-from oauth2client.client import GoogleCredentials
 import os
 import pprint
 import re
-from sty import fg, bg, ef, rs
+from sty import fg
 import sys
 
 """

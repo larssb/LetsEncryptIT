@@ -1,4 +1,3 @@
-[//]: # Tags/badges
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/larssb/LetsEncryptIT.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/larssb/LetsEncryptIT/context:python)
 [![Total alerts](https://img.shields.io/lgtm/alerts/g/larssb/LetsEncryptIT.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/larssb/LetsEncryptIT/alerts/)
 

@@ -12,6 +12,7 @@ spec:
           containers:
           - name: letsencryptit
             image: index.docker.io/larssb/letsencryptit
+            args: ['-c', 'from renew_letsencrypt_cert import renew_letsencrypt_cert; renew_letsencrypt_cert("$CERT_NAME", "$LETSENCRYPT_DATA_DIR")']
             env:
             - name: CERT_NAME
               valueFrom:

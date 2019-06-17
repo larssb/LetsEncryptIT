@@ -19,7 +19,7 @@ A tool for managing LetsEncrypt certificates. Focusing on Kubernetes and the Goo
     - [Dockerfiles](#dockerfiles)
       - [certbot-python3](#certbot-python3)
         - [Changes to the file](#changes-to-the-file)
-    - [Kubernetes files](#kubernetes-files)
+    - [Kubernetes deployment files](#kubernetes-deployment-files)
       - [cronjob.yml](#cronjobyml)
       - [letsencryptit-pod.yml](#letsencryptit-podyml)
   - [Things to note](#things-to-note)
@@ -79,7 +79,7 @@ The image is basically a ripoff of the official Dockerfile found [here](https://
 
 Basically only the top-level line of. From `FROM python:2-alpine3.9` to `FROM python:3-alpine3.9`
 
-### Kubernetes files
+### Kubernetes deployment files
 
 #### cronjob.yml
 

@@ -12,7 +12,7 @@ import subprocess
 Preparation
 """
 # Configure logging
-logging.basicConfig(filename='list_letsencrypt_cert.log', filemode='w', level=logging.DEBUG)
+logging.basicConfig(filename='../data/letsencrypt/logs/list_letsencrypt_cert.log', filemode='w', level=logging.DEBUG)
 
 # The pretty printer
 pp = pprint.PrettyPrinter(indent=4)

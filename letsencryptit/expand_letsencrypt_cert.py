@@ -26,7 +26,7 @@ import tempfile
 Preparation
 """
 # Configure logging
-logging.basicConfig(filename='expand_letsencrypt_cert.log', filemode='w', level=logging.DEBUG)
+logging.basicConfig(filename='../data/letsencrypt/logs/expand_letsencrypt_cert.log', filemode='w', level=logging.DEBUG)
 
 # Define the path to cloudflare.ini
 cloudflare_ini_path = tempfile.gettempdir() + "/cloudflare.ini"

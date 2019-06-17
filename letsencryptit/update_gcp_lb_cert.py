@@ -30,7 +30,7 @@ import sys
 Preparation
 """
 # Configure logging
-logging.basicConfig(filename='update_gcp_lb_cert.log', filemode='w', level=logging.DEBUG)
+logging.basicConfig(filename='../data/letsencrypt/logs/update_gcp_lb_cert.log', filemode='w', level=logging.DEBUG)
 logging.info("--- LOG START ---")
 logging.info("--- %s ---" % DATE_TIME)
 
